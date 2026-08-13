@@ -29,7 +29,7 @@ const getExecutablePath = () => {
 
 const getBrowser = async () => {
     if (!globalBrowser || !globalBrowser.connected) {
-        if (process.env.NODE_ENV === 'production') {
+        if (process.platform !== 'win32') {
             const puppeteerCore = require('puppeteer-core');
             const chromium = require('@sparticuz/chromium');
             globalBrowser = await puppeteerCore.launch({
