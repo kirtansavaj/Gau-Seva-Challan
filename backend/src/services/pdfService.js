@@ -1,6 +1,8 @@
+const path = require('path');
+process.env.PUPPETEER_CACHE_DIR = path.join(__dirname, '../../.cache/puppeteer');
+
 const puppeteer = require('puppeteer');
 const ejs = require('ejs');
-const path = require('path');
 const QRCode = require('qrcode');
 const fs = require('fs');
 
@@ -29,26 +31,15 @@ const getExecutablePath = () => {
 
 const getBrowser = async () => {
     if (!globalBrowser || !globalBrowser.connected) {
-        if (process.platform !== 'win32') {
-            const puppeteerCore = require('puppeteer-core');
-            const chromium = require('@sparticuz/chromium');
-            globalBrowser = await puppeteerCore.launch({
-                args: chromium.args,
-                defaultViewport: chromium.defaultViewport,
-                executablePath: await chromium.executablePath(),
-                headless: chromium.headless
-            });
-        } else {
-            const executablePath = getExecutablePath();
-            const launchOptions = {
-                headless: 'new',
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
-            };
-            if (executablePath) {
-                launchOptions.executablePath = executablePath;
-            }
-            globalBrowser = await puppeteer.launch(launchOptions);
+        const executablePath = getExecutablePath();
+        const launchOptions = {
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        };
+        if (executablePath) {
+            launchOptions.executablePath = executablePath;
         }
+        globalBrowser = await puppeteer.launch(launchOptions);
     }
     return globalBrowser;
 };
