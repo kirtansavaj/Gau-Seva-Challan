@@ -83,47 +83,51 @@ const resolveAssetPath = (filename) => {
     return null;
 };
 
-const generatePdf = async (donation) => {
+const generateHtml = async (donation) => {
+    // Generate QR Code data
+    const qrDataString = `Challan: ${donation.challanNo}\nDonor: ${donation.donorName}\nAmount: ₹${donation.amount}`;
+    const qrCodeData = await QRCode.toDataURL(qrDataString);
+
+    const amountInWords = numberToWords(donation.amount);
+
+    // Read background image as base64
+    let bgImageData = '';
+    let headerLogoData = '';
+    let sealData = '';
     try {
-        // Generate QR Code data
-        const qrDataString = `Challan: ${donation.challanNo}\nDonor: ${donation.donorName}\nAmount: ₹${donation.amount}`;
-        const qrCodeData = await QRCode.toDataURL(qrDataString);
-
-        const amountInWords = numberToWords(donation.amount);
-
-        // Read background image as base64
-        let bgImageData = '';
-        let headerLogoData = '';
-        let sealData = '';
-        try {
-            const bgPath = resolveAssetPath('Gau Mata.png');
-            if (bgPath) {
-                bgImageData = `data:image/png;base64,${fs.readFileSync(bgPath).toString('base64')}`;
-            }
-            
-            const logoPath = resolveAssetPath('Logo-removebg-preview.png');
-            if (logoPath) {
-                headerLogoData = `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`;
-            }
-
-            const sealPath = resolveAssetPath('seal.png');
-            if (sealPath) {
-                sealData = `data:image/png;base64,${fs.readFileSync(sealPath).toString('base64')}`;
-            }
-        } catch (e) {
-            console.error('Failed to read images:', e);
+        const bgPath = resolveAssetPath('Gau Mata.png');
+        if (bgPath) {
+            bgImageData = `data:image/png;base64,${fs.readFileSync(bgPath).toString('base64')}`;
+        }
+        
+        const logoPath = resolveAssetPath('Logo-removebg-preview.png');
+        if (logoPath) {
+            headerLogoData = `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`;
         }
 
-        // Render HTML using EJS
-        const templatePath = path.join(__dirname, '../templates/challan.ejs');
-        const html = await ejs.renderFile(templatePath, {
-            donation,
-            qrCodeData,
-            amountInWords,
-            bgImageData,
-            headerLogoData,
-            sealData
-        });
+        const sealPath = resolveAssetPath('seal.png');
+        if (sealPath) {
+            sealData = `data:image/png;base64,${fs.readFileSync(sealPath).toString('base64')}`;
+        }
+    } catch (e) {
+        console.error('Failed to read images:', e);
+    }
+
+    // Render HTML using EJS
+    const templatePath = path.join(__dirname, '../templates/challan.ejs');
+    return await ejs.renderFile(templatePath, {
+        donation,
+        qrCodeData,
+        amountInWords,
+        bgImageData,
+        headerLogoData,
+        sealData
+    });
+};
+
+const generatePdf = async (donation) => {
+    try {
+        const html = await generateHtml(donation);
 
         // Launch Puppeteer and generate PDF
         const browser = await getBrowser();
@@ -145,5 +149,6 @@ const generatePdf = async (donation) => {
 };
 
 module.exports = {
-    generatePdf
+    generatePdf,
+    generateHtml
 };
