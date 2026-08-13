@@ -29,15 +29,26 @@ const getExecutablePath = () => {
 
 const getBrowser = async () => {
     if (!globalBrowser || !globalBrowser.connected) {
-        const executablePath = getExecutablePath();
-        const launchOptions = {
-            headless: 'new',
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        };
-        if (executablePath) {
-            launchOptions.executablePath = executablePath;
+        if (process.env.NODE_ENV === 'production') {
+            const puppeteerCore = require('puppeteer-core');
+            const chromium = require('@sparticuz/chromium');
+            globalBrowser = await puppeteerCore.launch({
+                args: chromium.args,
+                defaultViewport: chromium.defaultViewport,
+                executablePath: await chromium.executablePath(),
+                headless: chromium.headless
+            });
+        } else {
+            const executablePath = getExecutablePath();
+            const launchOptions = {
+                headless: 'new',
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            };
+            if (executablePath) {
+                launchOptions.executablePath = executablePath;
+            }
+            globalBrowser = await puppeteer.launch(launchOptions);
         }
-        globalBrowser = await puppeteer.launch(launchOptions);
     }
     return globalBrowser;
 };

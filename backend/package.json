@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@sparticuz/chromium": "^149.0.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -24,6 +25,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.8.0",
     "puppeteer": "^25.3.0",
+    "puppeteer-core": "^25.6.0",
     "qrcode": "^1.5.4",
     "winston": "^3.19.0"
   },
