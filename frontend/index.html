@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Gau Seva</title>
+    <!-- Premium Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/global.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="./images/logo.png" alt="Logo" class="nav-logo">
+            <span class="nav-brand-text">Vaishnav Gau Seva Parivar Surat</span>
+        </div>
+        <ul class="nav-links">
+            <li class="active"><a href="index.html"><i class='bx bx-grid-alt'></i> Dashboard</a></li>
+            <li><a href="new-challan.html"><i class='bx bx-plus-circle'></i> New Challan</a></li>
+            <li><a href="history.html"><i class='bx bx-history'></i> Challan History</a></li>
+        </ul>
+        <div class="nav-bottom">
+            <a href="#" id="logoutBtn" class="logout-link"><i class='bx bx-log-out'></i> Logout</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="search-bar">
+                <i class='bx bx-search'></i>
+                <input type="text" id="searchInput" placeholder="Search by Challan, Name, Mobile...">
+            </div>
+            <a href="profile.html" class="header-profile">
+                <div class="profile-avatar">A</div>
+                <div style="display: flex; flex-direction: column;">
+                    <span class="profile-name" id="sidebarAdminName">Admin</span>
+                </div>
+            </a>
+        </header>
+
+        <div class="dashboard-header mb-4" style="margin-bottom: 2rem;">
+            <div>
+                <h1 class="section-title" style="margin-bottom: 0.5rem;">Overview</h1>
+                <p class="section-subtitle">Welcome back! Here's what's happening today.</p>
+            </div>
+        </div>
+
+        <div id="toast" class="toast hidden"></div>
+
+        <section id="dashboard" class="page-section">
+            <div class="stats-grid">
+                <div class="stat-card gradient-1">
+                    <div class="stat-info">
+                        <h3>Today's Collection</h3>
+                        <p id="todayTotal">₹ 0</p>
+                    </div>
+                    <div class="stat-icon" style="margin-left: auto;"><i class='bx bx-rupee'></i></div>
+                </div>
+                <div class="stat-card gradient-2">
+                    <div class="stat-info">
+                        <h3>Monthly Collection</h3>
+                        <p id="monthTotal">₹ 0</p>
+                    </div>
+                    <div class="stat-icon" style="margin-left: auto;"><i class='bx bx-calendar-event'></i></div>
+                </div>
+                <div class="stat-card gradient-3">
+                    <div class="stat-info">
+                        <h3>Total Donations</h3>
+                        <p id="allTimeTotal">₹ 0</p>
+                    </div>
+                    <div class="stat-icon" style="margin-left: auto;"><i class='bx bx-wallet'></i></div>
+                </div>
+                <div class="stat-card gradient-4">
+                    <div class="stat-info">
+                        <h3>Receipts Generated</h3>
+                        <p id="receiptCount">0</p>
+                    </div>
+                    <div class="stat-icon" style="margin-left: auto;"><i class='bx bx-receipt'></i></div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;" class="mt-4">
+                <h3 class="section-title" style="margin: 0;">Recent Donations</h3>
+            </div>
+            
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Challan No</th>
+                            <th>Date</th>
+                            <th>Donor Name</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentDonationsTable">
+                        <tr><td colspan="5" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Challan - Gau Seva</title>
+    <!-- Premium Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/global.css">
+    <link rel="stylesheet" href="./css/new-challan.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <img src="./images/logo.png" alt="Logo" class="nav-logo">
+            <span class="nav-brand-text">Vaishnav Gau Seva Parivar Surat</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html"><i class='bx bx-grid-alt'></i> Dashboard</a></li>
+            <li class="active"><a href="new-challan.html"><i class='bx bx-plus-circle'></i> New Challan</a></li>
+            <li><a href="history.html"><i class='bx bx-history'></i> Challan History</a></li>
+        </ul>
+        <div class="nav-bottom">
+            <a href="#" id="logoutBtn" class="logout-link"><i class='bx bx-log-out'></i> Logout</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="search-bar" style="visibility: hidden;">
+                <i class='bx bx-search'></i>
+                <input type="text" placeholder="Search...">
+            </div>
+            <a href="profile.html" class="user-profile">
+                <div class="avatar">A</div>
+                <div style="display: flex; flex-direction: column;">
+                    <span class="profile-name">Admin</span>
+                </div>
+            </a>
+        </header>
+
+        <div id="toast" class="toast hidden"></div>
+
+        <section id="new-challan" class="page-section">
+            <h2 class="section-title">Create New Challan</h2>
+            <div class="form-card glass-panel">
+                <form id="donationForm">
+                    <div class="form-row">
+                        <div class="form-group" id="donorNamesContainer">
+                            <label>Donor Name(s) <span class="required">*</span> <i class='bx bx-plus-circle' id="addDonorBtn" style="cursor: pointer; color: var(--primary); margin-left: 0.5rem; font-size: 1.1rem; vertical-align: middle;" title="Add another name"></i></label>
+                            <div class="donor-name-input-group" style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <input type="text" class="donorNameInput" required minlength="3" placeholder="Enter full name" style="flex: 1;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile">Mobile Number <span class="required">*</span></label>
+                            <input type="tel" id="mobile" name="mobile" required pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile number">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="address">Address <span class="required">*</span></label>
+                        <textarea id="address" name="address" rows="3" required placeholder="Enter complete address"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="amount">Amount (₹) <span class="required">*</span></label>
+                            <input type="number" id="amount" name="amount" required min="1" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="paymentMode">Payment Mode <span class="required">*</span></label>
+                            <select id="paymentMode" name="paymentMode" required>
+                                <option value="Cash">Cash</option>
+                                <option value="UPI">UPI</option>
+                                <option value="Cheque">Cheque</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="donationFor">Donation For (Purpose)</label>
+                            <select id="donationFor" name="donationFor">
+                                <option value="Gau Grass">Gau Grass</option>
+                                <option value="Shed Construction">Shed Construction</option>
+                                <option value="Medical Treatment">Medical Treatment</option>
+                                <option value="General Fund" selected>General Fund</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="collectedBy">Collected By</label>
+                            <input type="text" id="collectedBy" name="collectedBy" placeholder="Enter collector name">
+                        </div>
+                        <div class="form-group">
+                            <label for="remarks">Remarks</label>
+                            <input type="text" id="remarks" name="remarks" placeholder="Optional notes">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="btnReset">Reset Form</button>
+                        <button type="submit" class="btn btn-primary" id="btnSave">
+                            <i class='bx bx-save'></i> Save Challan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Receipt Preview Modal -->
+    <div id="receiptModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal"><i class='bx bx-x'></i></span>
+            <div style="font-size: 3rem; color: var(--success); margin-bottom: 1rem;"><i class='bx bx-check-circle'></i></div>
+            <h2>Challan Generated!</h2>
+            <p style="color: var(--text-light); margin-bottom: 1.5rem;">The donation has been recorded successfully.</p>
+            
+            <div class="receipt-preview" id="receiptPreviewData">
+                <!-- details inserted here -->
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="btnDownloadPdf"><i class='bx bx-download'></i> Download PDF</button>
+                <button class="btn btn-primary" id="btnPrintPdf"><i class='bx bx-printer'></i> Print Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/new-challan.js"></script>
+</body>
+</html>
