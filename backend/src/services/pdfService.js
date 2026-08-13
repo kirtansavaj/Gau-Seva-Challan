@@ -86,7 +86,7 @@ const generateHtml = async (donation) => {
     let headerLogoData = '';
     let sealData = '';
     try {
-        const bgPath = resolveAssetPath('Gau Mata.png');
+        const bgPath = resolveAssetPath('Gau Mata.jpeg');
         if (bgPath) {
             bgImageData = `data:image/png;base64,${fs.readFileSync(bgPath).toString('base64')}`;
         }
