@@ -129,10 +129,32 @@ document.getElementById('btnPrintPdf').addEventListener('click', () => {
     if (currentChallanId) viewPdf(currentChallanId);
 });
 
+document.getElementById('btnSharePdf').addEventListener('click', () => {
+    if (currentChallanId) sharePdf(currentChallanId);
+});
+
 function downloadPdf(id) {
     window.open(getAuthUrl(`${API_URL}/${id}/pdf`), '_blank');
 }
 
 function viewPdf(id) {
     window.open(getAuthUrl(`${API_URL}/${id}/print`), '_blank');
+}
+
+async function sharePdf(id) {
+    try {
+        const url = getAuthUrl(`${API_URL}/${id}/pdf`);
+        const text = 'Donation receipt for Gau Seva';
+        if (navigator.share) {
+            await navigator.share({
+                title: 'Donation Receipt',
+                text: text,
+                url: url
+            });
+        } else {
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + ': ' + url)}`, '_blank');
+        }
+    } catch (error) {
+        console.error('Error sharing:', error);
+    }
 }

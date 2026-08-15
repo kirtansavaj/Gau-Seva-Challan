@@ -61,6 +61,7 @@ function renderHistoryTable(donations) {
             <td>
                 <button class="action-btn" title="Print PDF" onclick="viewPdf('${d._id}')"><i class='bx bx-printer'></i></button>
                 <button class="action-btn" title="Download PDF" onclick="downloadPdf('${d._id}')"><i class='bx bx-download'></i></button>
+                <button class="action-btn" title="Share" onclick="sharePdf('${d._id}', '${d.donorName}')"><i class='bx bx-share-alt'></i></button>
                 <button class="action-btn" title="Delete" onclick="deleteChallan('${d._id}')" style="color: var(--danger);"><i class='bx bx-trash'></i></button>
             </td>
         `;
@@ -112,6 +113,24 @@ function viewPdf(id) {
     window.open(getAuthUrl(`${API_URL}/${id}/print`), '_blank');
 }
 
+async function sharePdf(id, donorName) {
+    try {
+        const url = getAuthUrl(`${API_URL}/${id}/pdf`);
+        const text = `Donation receipt for ${donorName || 'Gau Seva'}`;
+        if (navigator.share) {
+            await navigator.share({
+                title: 'Donation Receipt',
+                text: text,
+                url: url
+            });
+        } else {
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + ': ' + url)}`, '_blank');
+        }
+    } catch (error) {
+        console.error('Error sharing:', error);
+    }
+}
+
 async function deleteChallan(id) {
     if (!confirm('Are you sure you want to delete this challan? This action cannot be undone.')) {
         return;
@@ -137,5 +156,6 @@ async function deleteChallan(id) {
 
 window.downloadPdf = downloadPdf;
 window.viewPdf = viewPdf;
+window.sharePdf = sharePdf;
 window.deleteChallan = deleteChallan;
 

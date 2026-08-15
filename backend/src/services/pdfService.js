@@ -3,7 +3,6 @@ process.env.PUPPETEER_CACHE_DIR = path.join(__dirname, '../../.cache/puppeteer')
 
 const puppeteer = require('puppeteer');
 const ejs = require('ejs');
-const QRCode = require('qrcode');
 const fs = require('fs');
 
 let globalBrowser = null;
@@ -75,10 +74,6 @@ const resolveAssetPath = (filename) => {
 };
 
 const generateHtml = async (donation) => {
-    // Generate QR Code data
-    const qrDataString = `Challan: ${donation.challanNo}\nDonor: ${donation.donorName}\nAmount: ₹${donation.amount}`;
-    const qrCodeData = await QRCode.toDataURL(qrDataString);
-
     const amountInWords = numberToWords(donation.amount);
 
     // Read background image as base64
@@ -108,7 +103,6 @@ const generateHtml = async (donation) => {
     const templatePath = path.join(__dirname, '../templates/challan.ejs');
     return await ejs.renderFile(templatePath, {
         donation,
-        qrCodeData,
         amountInWords,
         bgImageData,
         headerLogoData,

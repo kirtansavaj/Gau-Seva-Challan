@@ -83,6 +83,7 @@ function renderDonationsTable(donations) {
             <td>
                 <button class="action-btn" title="View/Print PDF" onclick="viewPdf('${d._id}')"><i class='bx bx-printer'></i></button>
                 <button class="action-btn" title="Download" onclick="downloadPdf('${d._id}')"><i class='bx bx-download'></i></button>
+                <button class="action-btn" title="Share" onclick="sharePdf('${d._id}', '${d.donorName}')"><i class='bx bx-share-alt'></i></button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -97,8 +98,27 @@ function viewPdf(id) {
     window.open(getAuthUrl(`${API_URL}/${id}/print`), '_blank');
 }
 
+async function sharePdf(id, donorName) {
+    try {
+        const url = getAuthUrl(`${API_URL}/${id}/pdf`);
+        const text = `Donation receipt for ${donorName || 'Gau Seva'}`;
+        if (navigator.share) {
+            await navigator.share({
+                title: 'Donation Receipt',
+                text: text,
+                url: url
+            });
+        } else {
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + ': ' + url)}`, '_blank');
+        }
+    } catch (error) {
+        console.error('Error sharing:', error);
+    }
+}
+
 window.downloadPdf = downloadPdf;
 window.viewPdf = viewPdf;
+window.sharePdf = sharePdf;
 
 
 function initSearch() {
