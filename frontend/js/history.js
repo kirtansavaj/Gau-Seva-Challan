@@ -1,4 +1,4 @@
-import { sharePdfDirectly } from './shareHelper.js';
+import { getAuthHeaders } from './auth.js';
 
 const API_URL = import.meta.env.VITE_API_URL + '/challan';
 let currentPage = 1;
@@ -62,8 +62,7 @@ function renderHistoryTable(donations) {
             <td>${d.paymentMode}</td>
             <td>
                 <button class="action-btn" title="Print PDF" onclick="viewPdf('${d._id}')"><i class='bx bx-printer'></i></button>
-                <button class="action-btn" title="Download PDF" onclick="downloadPdf('${d._id}')"><i class='bx bx-download'></i></button>
-                <button class="action-btn" title="Share" onclick="sharePdf('${d._id}', '${d.donorName}')"><i class='bx bx-share-alt'></i></button>
+                <button class="action-btn" title="Download" onclick="downloadPdf('${d._id}')"><i class='bx bx-download'></i></button>
                 <button class="action-btn" title="Delete" onclick="deleteChallan('${d._id}')" style="color: var(--danger);"><i class='bx bx-trash'></i></button>
             </td>
         `;
@@ -113,15 +112,6 @@ function downloadPdf(id) {
 
 function viewPdf(id) {
     window.open(`print-receipt.html?id=${id}&action=print`, '_blank');
-}
-
-async function sharePdf(id, donorName) {
-    const btn = document.querySelector(`button[onclick="sharePdf('${id}')"]`) || document.querySelector(`button[onclick="sharePdf('${id}', '${donorName}')"]`);
-    if(btn) btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
-    
-    await sharePdfDirectly(id);
-    
-    if(btn) btn.innerHTML = '<i class="bx bx-share-alt"></i>';
 }
 
 async function deleteChallan(id) {

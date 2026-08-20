@@ -1,7 +1,6 @@
-import { getAuthHeaders, getAuthUrl } from './auth.js';
-import { sharePdfDirectly } from './shareHelper.js';
+import { getAuthHeaders } from './auth.js';
 
-const API_URL = import.meta.env.VITE_API_URL + '/challan';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboardData();
@@ -85,34 +84,17 @@ function renderDonationsTable(donations) {
             <td>₹ ${d.amount.toLocaleString('en-IN')}</td>
             <td>
                 <button class="action-btn" title="View/Print PDF" onclick="viewPdf('${d._id}')"><i class='bx bx-printer'></i></button>
-                <button class="action-btn" title="Download" onclick="downloadPdf('${d._id}')"><i class='bx bx-download'></i></button>
-                <button class="action-btn" title="Share" onclick="sharePdf('${d._id}', '${d.donorName}')"><i class='bx bx-share-alt'></i></button>
             </td>
         `;
         tbody.appendChild(tr);
     });
 }
 
-function downloadPdf(id) {
-    window.open(`print-receipt.html?id=${id}&action=download`, '_blank');
-}
-
 function viewPdf(id) {
     window.open(`print-receipt.html?id=${id}&action=print`, '_blank');
 }
 
-async function sharePdf(id, donorName) {
-    const btn = document.querySelector(`button[onclick="sharePdf('${id}', '${donorName}')"]`);
-    if(btn) btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
-    
-    await sharePdfDirectly(id);
-    
-    if(btn) btn.innerHTML = '<i class="bx bx-share-alt"></i>';
-}
-
-window.downloadPdf = downloadPdf;
 window.viewPdf = viewPdf;
-window.sharePdf = sharePdf;
 
 
 function initSearch() {
