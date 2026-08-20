@@ -108,10 +108,6 @@ function updatePagination() {
     document.getElementById('nextPage').disabled = currentPage === totalPages;
 }
 
-function viewPdf(id) {
-    window.open(`print-receipt.html?id=${id}&action=print`, '_blank');
-}
-
 async function deleteChallan(id) {
     if (!confirm('Are you sure you want to delete this challan? This action cannot be undone.')) {
         return;
@@ -134,5 +130,4 @@ async function deleteChallan(id) {
         showToast('Error deleting challan', 'error');
     }
 }
-window.viewPdf = viewPdf;
 window.deleteChallan = deleteChallan;

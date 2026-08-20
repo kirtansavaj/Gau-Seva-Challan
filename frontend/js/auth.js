@@ -4,10 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     
     const isLoginPage = window.location.pathname.endsWith('login.html');
-    const isReceiptPage = window.location.pathname.endsWith('print-receipt.html');
 
-    // Redirect to login if no token and not on login or receipt page
-    if (!token && !isLoginPage && !isReceiptPage) {
+    // Redirect to login if no token and not on login page
+    if (!token && !isLoginPage) {
         window.location.href = 'login.html';
         return;
     }
