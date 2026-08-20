@@ -1,3 +1,6 @@
+import { getAuthHeaders, getAuthUrl } from './auth.js';
+import { sharePdfDirectly } from './shareHelper.js';
+
 const API_URL = import.meta.env.VITE_API_URL + '/challan';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -99,21 +102,12 @@ function viewPdf(id) {
 }
 
 async function sharePdf(id, donorName) {
-    try {
-        const url = `${window.location.origin}/print-receipt.html?id=${id}`;
-        const text = `Donation receipt for ${donorName || 'Gau Seva'}`;
-        if (navigator.share) {
-            await navigator.share({
-                title: 'Donation Receipt',
-                text: text,
-                url: url
-            });
-        } else {
-            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + ': ' + url)}`, '_blank');
-        }
-    } catch (error) {
-        console.error('Error sharing:', error);
-    }
+    const btn = document.querySelector(`button[onclick="sharePdf('${id}', '${donorName}')"]`);
+    if(btn) btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
+    
+    await sharePdfDirectly(id);
+    
+    if(btn) btn.innerHTML = '<i class="bx bx-share-alt"></i>';
 }
 
 window.downloadPdf = downloadPdf;

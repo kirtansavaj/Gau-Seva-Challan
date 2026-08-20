@@ -1,3 +1,5 @@
+import { sharePdfDirectly } from './shareHelper.js';
+
 const API_URL = import.meta.env.VITE_API_URL + '/challan';
 let currentChallanId = null;
 
@@ -142,19 +144,18 @@ function viewPdf(id) {
 }
 
 async function sharePdf(id) {
-    try {
-        const url = `${window.location.origin}/print-receipt.html?id=${id}`;
-        const text = `Donation receipt for Gau Seva`;
-        if (navigator.share) {
-            await navigator.share({
-                title: 'Donation Receipt',
-                text: text,
-                url: url
-            });
-        } else {
-            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + ': ' + url)}`, '_blank');
-        }
-    } catch (error) {
-        console.error('Error sharing:', error);
+    const btn = document.getElementById('btnSharePdf');
+    let originalHtml = '';
+    if(btn) {
+        originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Share PDF';
+        btn.disabled = true;
+    }
+    
+    await sharePdfDirectly(id);
+    
+    if(btn) {
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
     }
 }
