@@ -77,8 +77,8 @@ export async function sharePdfDirectly(id) {
         wrapper.style.position = 'fixed';
         wrapper.style.left = '0';
         wrapper.style.top = '0';
-        wrapper.style.width = '800px';
-        wrapper.style.height = '1131px'; // A4 aspect ratio
+        wrapper.style.width = '210mm';
+        wrapper.style.height = '296mm'; // Strict A4 constraint
         wrapper.style.zIndex = '-9999'; // Hide behind main content
         wrapper.style.pointerEvents = 'none';
         
