@@ -47,18 +47,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Handle print or download based on action param
             const action = urlParams.get('action');
             setTimeout(() => {
+                const element = document.getElementById('receiptContainer');
+                
                 if (action === 'download') {
-                    const element = document.getElementById('receiptContainer');
                     const opt = {
-                        margin: 10,
-                        filename: `Receipt_${data.challanNo}.pdf`,
+                        margin: 0,
+                        filename: `Receipt_${result.data.challanNo}.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        pagebreak: { mode: 'avoid-all' },
                         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                     };
-                    html2pdf().set(opt).from(element).save().then(() => {
-                        // Close tab after download if we opened it just for downloading
-                        // setTimeout(() => window.close(), 1000); // Optional
+                    html2pdf().set(opt).from(element).save();
+                } else if (action === 'share') {
+                    const opt = {
+                        margin: 0,
+                        filename: `Receipt_${result.data.challanNo}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, logging: false },
+                        pagebreak: { mode: 'avoid-all' },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+                    html2pdf().set(opt).from(element).outputPdf('blob').then(blob => {
+                        window.parent.postMessage({ type: 'SHARE_PDF', blob: blob }, '*');
+                    }).catch(err => {
+                        console.error(err);
+                        window.parent.postMessage({ type: 'SHARE_ERROR' }, '*');
                     });
                 } else {
                     window.print();

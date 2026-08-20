@@ -28,117 +28,58 @@ export async function sharePdfDirectly(id) {
     }
 
     try {
-        // 1. Fetch the Data
-        const response = await fetch(`${API_URL}/challan/${id}`, {
-            headers: getAuthHeaders()
+        return new Promise((resolve, reject) => {
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '100vw'; // Hide completely offscreen
+            iframe.style.width = '800px';
+            iframe.style.height = '1131px';
+            iframe.src = `${window.location.origin}/print-receipt.html?id=${id}&action=share`;
+
+            const messageHandler = async (event) => {
+                if (event.data && event.data.type === 'SHARE_PDF') {
+                    window.removeEventListener('message', messageHandler);
+                    if(document.body.contains(iframe)) document.body.removeChild(iframe);
+                    
+                    const blob = event.data.blob;
+                    const file = new File([blob], `Receipt_${id}.pdf`, { type: 'application/pdf' });
+                    
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            title: `Donation Receipt ${id}`
+                        });
+                        resolve();
+                    } catch (shareErr) {
+                        console.error("Share failed or was cancelled:", shareErr);
+                        // Fallback if sharing is aborted or fails
+                        if (shareErr.name !== 'AbortError') {
+                            alert("Sharing failed. Downloading instead...");
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = file.name;
+                            link.click();
+                        }
+                        resolve();
+                    }
+                } else if (event.data && event.data.type === 'SHARE_ERROR') {
+                    window.removeEventListener('message', messageHandler);
+                    if(document.body.contains(iframe)) document.body.removeChild(iframe);
+                    alert("Failed to generate PDF");
+                    reject(new Error("PDF generation failed in iframe"));
+                }
+            };
+
+            window.addEventListener('message', messageHandler);
+            document.body.appendChild(iframe);
+            
+            // Timeout after 10 seconds just in case
+            setTimeout(() => {
+                window.removeEventListener('message', messageHandler);
+                if(document.body.contains(iframe)) document.body.removeChild(iframe);
+                reject(new Error("Timeout generating PDF"));
+            }, 10000);
         });
-        const result = await response.json();
-        
-        if (!result.success) throw new Error("Failed to load data");
-        const data = result.data;
-
-        // 2. Fetch the HTML template
-        const htmlRes = await fetch(`${window.location.origin}/print-receipt.html`);
-        const htmlText = await htmlRes.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlText, 'text/html');
-        const receiptContainer = doc.getElementById('receiptContainer');
-
-        // 3. Populate the template
-        receiptContainer.querySelector('#challanNo').textContent = data.challanNo;
-        receiptContainer.querySelector('#footerChallanNo').textContent = data.challanNo;
-        receiptContainer.querySelector('#receiptDate').textContent = new Date(data.receiptDate).toLocaleDateString('en-IN');
-        receiptContainer.querySelector('#paymentMode').textContent = data.paymentMode;
-        receiptContainer.querySelector('#donationFor').textContent = data.donationFor;
-        
-        receiptContainer.querySelector('#donorName').textContent = data.donorName;
-        receiptContainer.querySelector('#mobile').textContent = data.mobile;
-        receiptContainer.querySelector('#address').textContent = data.address || '-';
-        
-        if (data.remarks) {
-            receiptContainer.querySelector('#remarks').textContent = data.remarks;
-            receiptContainer.querySelector('#remarksContainer').classList.remove('hidden');
-        }
-        
-        receiptContainer.querySelector('#amount').textContent = data.amount.toLocaleString('en-IN');
-        receiptContainer.querySelector('#amountInWords').textContent = numberToWords(data.amount);
-        receiptContainer.querySelector('#collectedBy').textContent = data.collectedBy || 'Admin';
-
-        // 4. Inject all styles from the template (includes A4 dimensions and fonts)
-        const customStyles = Array.from(doc.querySelectorAll('style'));
-        customStyles.forEach(s => document.head.appendChild(s));
-        
-        // Ensure Google Fonts are loaded explicitly if they were via link tags
-        const fontLinks = Array.from(doc.querySelectorAll('link[href*="fonts.googleapis.com"]'));
-        fontLinks.forEach(l => document.head.appendChild(l));
-
-        // Inject the container into the body (off-screen but renderable)
-        const wrapper = document.createElement('div');
-        wrapper.style.position = 'fixed';
-        wrapper.style.left = '0';
-        wrapper.style.top = '0';
-        wrapper.style.width = '210mm';
-        wrapper.style.height = '296mm'; // Strict A4 constraint
-        wrapper.style.zIndex = '-9999'; // Hide behind main content
-        wrapper.style.pointerEvents = 'none';
-        
-        receiptContainer.style.position = 'relative';
-        receiptContainer.style.backgroundColor = '#ffffff';
-        receiptContainer.classList.remove('hidden');
-        
-        wrapper.appendChild(receiptContainer);
-        document.body.appendChild(wrapper);
-
-        // Wait a tiny bit for fonts and DOM layout to settle
-        await new Promise(r => setTimeout(r, 300));
-
-        // 5. Ensure html2pdf is loaded
-        if (!window.html2pdf) {
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
-
-        // 6. Generate PDF Blob
-        const opt = {
-            margin: [0, 0, 0, 0], // Remove margin to respect A4 exact size
-            filename: `Receipt_${data.challanNo}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 794 },
-            pagebreak: { mode: 'avoid-all' }, // Force single page
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        const pdfBlob = await html2pdf().set(opt).from(receiptContainer).outputPdf('blob');
-
-        // Cleanup DOM
-        document.body.removeChild(wrapper);
-        customStyles.forEach(s => {
-            if (s.parentNode) s.parentNode.removeChild(s);
-        });
-        fontLinks.forEach(l => {
-            if (l.parentNode) l.parentNode.removeChild(l);
-        });
-
-        // 7. Share File
-        const file = new File([pdfBlob], `Receipt_${data.challanNo}.pdf`, { type: 'application/pdf' });
-        
-        if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                files: [file],
-                title: `Donation Receipt ${data.challanNo}`
-            });
-        } else {
-            alert("File sharing is not supported on this browser. Downloading instead...");
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(pdfBlob);
-            link.download = file.name;
-            link.click();
-        }
 
     } catch (error) {
         console.error("Error sharing PDF directly:", error);
