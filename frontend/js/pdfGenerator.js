@@ -1,23 +1,5 @@
 import { getAuthHeaders } from './auth.js';
-
-// Number to Words Converter for Indian Rupees
-function numberToWords(num) {
-    const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
-    const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    
-    if ((num = num.toString()).length > 9) return 'overflow';
-    const n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-    if (!n) return;
-    
-    let str = '';
-    str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
-    str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
-    str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
-    str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
-    str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
-    
-    return str.trim();
-}
+import { numberToWords } from './utils.js';
 
 async function fetchAsBase64(url) {
     const res = await fetch(url);
@@ -30,56 +12,74 @@ async function fetchAsBase64(url) {
     return window.btoa(binary);
 }
 
-// Ensure pdfmake and fonts are loaded
-async function ensurePdfMake() {
-    if (!window.pdfMake) {
-        await new Promise((resolve) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js';
-            script.onload = resolve;
-            document.head.appendChild(script);
-        });
-    }
+let pdfMakeReadyPromise = null;
 
-    // Initialize VFS if empty
-    if (!window.pdfMake.vfs) {
-        window.pdfMake.vfs = {};
-    }
+// Ensure pdfmake and fonts are loaded (Cached so it only runs once)
+function ensurePdfMake() {
+    if (pdfMakeReadyPromise) return pdfMakeReadyPromise;
 
-    // Load Roboto (default for English) and Noto Serif Gujarati
-    if (!window.pdfMake.vfs['Roboto-Regular.ttf']) {
-        const roboto = await fetchAsBase64('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-Regular.ttf');
-        window.pdfMake.vfs['Roboto-Regular.ttf'] = roboto;
-        
-        const robotoMedium = await fetchAsBase64('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-Medium.ttf');
-        window.pdfMake.vfs['Roboto-Medium.ttf'] = robotoMedium;
-        
-        // Fetch Gujarati Font (Noto Serif Gujarati)
+    pdfMakeReadyPromise = (async () => {
         try {
-            const gujarati = await fetchAsBase64('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSerifGujarati/NotoSerifGujarati-Regular.ttf');
-            window.pdfMake.vfs['NotoGujarati-Regular.ttf'] = gujarati;
-
-            const gujaratiBold = await fetchAsBase64('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSerifGujarati/NotoSerifGujarati-Bold.ttf');
-            window.pdfMake.vfs['NotoGujarati-Bold.ttf'] = gujaratiBold;
-        } catch(e) {
-            console.error("Failed to fetch Gujarati fonts", e);
-        }
-
-        window.pdfMake.fonts = {
-            Roboto: {
-                normal: 'Roboto-Regular.ttf',
-                bold: 'Roboto-Medium.ttf',
-                italics: 'Roboto-Regular.ttf',
-                bolditalics: 'Roboto-Medium.ttf'
-            },
-            Gujarati: {
-                normal: 'NotoGujarati-Regular.ttf',
-                bold: 'NotoGujarati-Bold.ttf',
-                italics: 'NotoGujarati-Regular.ttf',
-                bolditalics: 'NotoGujarati-Bold.ttf'
+            if (!window.pdfMake) {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js';
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error("Failed to load pdfmake script"));
+                    document.head.appendChild(script);
+                });
             }
-        };
-    }
+
+            // Initialize VFS if empty
+            if (!window.pdfMake.vfs) {
+                window.pdfMake.vfs = {};
+            }
+
+            // Load Roboto (default for English) and Noto Serif Gujarati safely
+            if (!window.pdfMake.vfs['Roboto-Regular.ttf']) {
+                try {
+                    const roboto = await fetchAsBase64('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-Regular.ttf');
+                    window.pdfMake.vfs['Roboto-Regular.ttf'] = roboto;
+                } catch(e) { console.warn("Failed to fetch Roboto Regular font", e); }
+                
+                try {
+                    const robotoMedium = await fetchAsBase64('https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-Medium.ttf');
+                    window.pdfMake.vfs['Roboto-Medium.ttf'] = robotoMedium;
+                } catch(e) { console.warn("Failed to fetch Roboto Medium font", e); }
+                
+                // Fetch Gujarati Font (Noto Serif Gujarati)
+                try {
+                    const gujarati = await fetchAsBase64('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSerifGujarati/NotoSerifGujarati-Regular.ttf');
+                    window.pdfMake.vfs['NotoGujarati-Regular.ttf'] = gujarati;
+
+                    const gujaratiBold = await fetchAsBase64('https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSerifGujarati/NotoSerifGujarati-Bold.ttf');
+                    window.pdfMake.vfs['NotoGujarati-Bold.ttf'] = gujaratiBold;
+                } catch(e) {
+                    console.warn("Failed to fetch Gujarati fonts", e);
+                }
+
+                window.pdfMake.fonts = {
+                    Roboto: {
+                        normal: 'Roboto-Regular.ttf',
+                        bold: 'Roboto-Medium.ttf',
+                        italics: 'Roboto-Regular.ttf',
+                        bolditalics: 'Roboto-Medium.ttf'
+                    },
+                    Gujarati: {
+                        normal: 'NotoGujarati-Regular.ttf',
+                        bold: 'NotoGujarati-Bold.ttf',
+                        italics: 'NotoGujarati-Regular.ttf',
+                        bolditalics: 'NotoGujarati-Bold.ttf'
+                    }
+                };
+            }
+        } catch (err) {
+            console.error("Critical error loading PDF generation resources:", err);
+            throw err;
+        }
+    })();
+
+    return pdfMakeReadyPromise;
 }
 
 export async function generateTruePdfBlob(data) {
