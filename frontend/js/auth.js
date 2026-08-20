@@ -4,9 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     
     const isLoginPage = window.location.pathname.endsWith('login.html');
+    const isReceiptPage = window.location.pathname.endsWith('print-receipt.html');
 
-    // Redirect to login if no token and not on login page
-    if (!token && !isLoginPage) {
+    // Redirect to login if no token and not on login or receipt page
+    if (!token && !isLoginPage && !isReceiptPage) {
         window.location.href = 'login.html';
         return;
     }
@@ -32,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
         inactivityTimer = setTimeout(performLogout, INACTIVITY_LIMIT);
     };
 
-    // Only set up inactivity timer if logged in and not on login page
-    if (!isLoginPage && token) {
+    // Only set up inactivity timer if logged in and not on login/receipt page
+    if (!isLoginPage && !isReceiptPage && token) {
         resetInactivityTimer();
         const activityEvents = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'];
         activityEvents.forEach(event => {

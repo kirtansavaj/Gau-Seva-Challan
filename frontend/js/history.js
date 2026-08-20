@@ -115,7 +115,7 @@ function viewPdf(id) {
 
 async function sharePdf(id, donorName) {
     try {
-        const url = getAuthUrl(`${API_URL}/${id}/pdf`);
+        const url = `${window.location.origin}/print-receipt.html?id=${id}`;
         const text = `Donation receipt for ${donorName || 'Gau Seva'}`;
         if (navigator.share) {
             await navigator.share({
