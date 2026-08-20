@@ -83,7 +83,7 @@ function renderDonationsTable(donations) {
             <td>${d.donorName}</td>
             <td>₹ ${d.amount.toLocaleString('en-IN')}</td>
             <td>
-                <button class="action-btn" title="View/Print PDF" onclick="viewPdf('${d._id}')"><i class='bx bx-printer'></i></button>
+                <button class="action-btn" title="View" onclick="viewPdf('${d._id}')"><i class='bx bx-show'></i></button>
             </td>
         `;
         tbody.appendChild(tr);

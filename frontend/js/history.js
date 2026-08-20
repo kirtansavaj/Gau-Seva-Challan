@@ -61,7 +61,7 @@ function renderHistoryTable(donations) {
             <td>₹ ${d.amount.toLocaleString('en-IN')}</td>
             <td>${d.paymentMode}</td>
             <td>
-                <button class="action-btn" title="Print PDF" onclick="viewPdf('${d._id}')"><i class='bx bx-printer'></i></button>
+                <button class="action-btn" title="View" onclick="viewPdf('${d._id}')"><i class='bx bx-show'></i></button>
                 <button class="action-btn" title="Delete" onclick="deleteChallan('${d._id}')" style="color: var(--danger);"><i class='bx bx-trash'></i></button>
             </td>
         `;
