@@ -9,8 +9,7 @@ export default defineConfig({
         login: resolve(import.meta.dirname, 'login.html'),
         history: resolve(import.meta.dirname, 'history.html'),
         newChallan: resolve(import.meta.dirname, 'new-challan.html'),
-        profile: resolve(import.meta.dirname, 'profile.html'),
-        printReceipt: resolve(import.meta.dirname, 'print-receipt.html')
+        profile: resolve(import.meta.dirname, 'profile.html')
       }
     }
   }

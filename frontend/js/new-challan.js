@@ -1,4 +1,4 @@
-import { sharePdfDirectly } from './shareHelper.js';
+
 
 const API_URL = import.meta.env.VITE_API_URL + '/challan';
 let currentChallanId = null;
@@ -123,39 +123,6 @@ document.querySelector('.close-modal').addEventListener('click', () => {
     document.getElementById('receiptModal').classList.add('hidden');
 });
 
-document.getElementById('btnDownloadPdf').addEventListener('click', () => {
-    if (currentChallanId) downloadPdf(currentChallanId);
+document.querySelector('.close-modal-btn').addEventListener('click', () => {
+    document.getElementById('receiptModal').classList.add('hidden');
 });
-
-document.getElementById('btnPrintPdf').addEventListener('click', () => {
-    if (currentChallanId) viewPdf(currentChallanId);
-});
-
-document.getElementById('btnSharePdf').addEventListener('click', () => {
-    if (currentChallanId) sharePdf(currentChallanId);
-});
-
-function downloadPdf(id) {
-    window.open(`print-receipt.html?id=${id}&action=download`, '_blank');
-}
-
-function viewPdf(id) {
-    window.open(`print-receipt.html?id=${id}&action=print`, '_blank');
-}
-
-async function sharePdf(id) {
-    const btn = document.getElementById('btnSharePdf');
-    let originalHtml = '';
-    if(btn) {
-        originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Share PDF';
-        btn.disabled = true;
-    }
-    
-    await sharePdfDirectly(id);
-    
-    if(btn) {
-        btn.innerHTML = originalHtml;
-        btn.disabled = false;
-    }
-}
