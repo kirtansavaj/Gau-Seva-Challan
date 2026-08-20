@@ -64,12 +64,13 @@ export async function sharePdfDirectly(id) {
         receiptContainer.querySelector('#amountInWords').textContent = numberToWords(data.amount);
         receiptContainer.querySelector('#collectedBy').textContent = data.collectedBy || 'Admin';
 
-        // 4. Inject CSS for Google Fonts
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+Gujarati:wght@400;600;700&display=swap');
-        `;
-        document.head.appendChild(style);
+        // 4. Inject all styles from the template (includes A4 dimensions and fonts)
+        const customStyles = Array.from(doc.querySelectorAll('style'));
+        customStyles.forEach(s => document.head.appendChild(s));
+        
+        // Ensure Google Fonts are loaded explicitly if they were via link tags
+        const fontLinks = Array.from(doc.querySelectorAll('link[href*="fonts.googleapis.com"]'));
+        fontLinks.forEach(l => document.head.appendChild(l));
 
         // Inject the container into the body (off-screen but renderable)
         const wrapper = document.createElement('div');
@@ -82,10 +83,6 @@ export async function sharePdfDirectly(id) {
         wrapper.style.pointerEvents = 'none';
         
         receiptContainer.style.position = 'relative';
-        receiptContainer.style.left = '0';
-        receiptContainer.style.top = '0';
-        receiptContainer.style.width = '100%';
-        receiptContainer.style.height = '100%';
         receiptContainer.style.backgroundColor = '#ffffff';
         receiptContainer.classList.remove('hidden');
         
@@ -108,10 +105,11 @@ export async function sharePdfDirectly(id) {
 
         // 6. Generate PDF Blob
         const opt = {
-            margin: 10,
+            margin: [0, 0, 0, 0], // Remove margin to respect A4 exact size
             filename: `Receipt_${data.challanNo}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false },
+            html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 794 },
+            pagebreak: { mode: 'avoid-all' }, // Force single page
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
@@ -119,7 +117,12 @@ export async function sharePdfDirectly(id) {
 
         // Cleanup DOM
         document.body.removeChild(wrapper);
-        document.head.removeChild(style);
+        customStyles.forEach(s => {
+            if (s.parentNode) s.parentNode.removeChild(s);
+        });
+        fontLinks.forEach(l => {
+            if (l.parentNode) l.parentNode.removeChild(l);
+        });
 
         // 7. Share File
         const file = new File([pdfBlob], `Receipt_${data.challanNo}.pdf`, { type: 'application/pdf' });
