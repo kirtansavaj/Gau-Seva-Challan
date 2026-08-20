@@ -1,5 +1,6 @@
 import { getAuthHeaders } from './auth.js';
 import { generateTruePdfBlob } from './pdfGenerator.js';
+import { sharePdfDirectly } from './shareHelper.js';
 import { numberToWords } from './utils.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -27,6 +28,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Hide loading, show receipt
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('receiptContainer').classList.remove('hidden');
+
+            // Attach Share Button Event
+            const shareBtn = document.getElementById('shareBtn');
+            if (shareBtn) {
+                shareBtn.addEventListener('click', async () => {
+                    const originalText = shareBtn.innerHTML;
+                    shareBtn.innerHTML = '<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Preparing...';
+                    await sharePdfDirectly(id);
+                    shareBtn.innerHTML = originalText;
+                });
+            }
             
             // Handle print or download based on action param
             const action = urlParams.get('action');
