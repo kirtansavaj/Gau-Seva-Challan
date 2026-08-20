@@ -1,5 +1,4 @@
 import { getAuthHeaders } from './auth.js';
-import { generateTruePdfBlob } from './pdfGenerator.js';
 import { sharePdfDirectly } from './shareHelper.js';
 import { numberToWords } from './utils.js';
 
@@ -43,26 +42,50 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Handle print or download based on action param
             const action = urlParams.get('action');
             
-            if (action === 'download') {
-                // Generate PDF and download
-                try {
-                    const blob = await generateTruePdfBlob(result.data);
-                    const url = URL.createObjectURL(blob);
-                    
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = `Receipt_${result.data.challanNo}.pdf`;
-                    link.click();
-                    
-                    // Revoke URL to prevent memory leaks, then close tab
-                    setTimeout(() => {
-                        URL.revokeObjectURL(url);
-                        window.close();
-                    }, 2000);
-                } catch(err) {
-                    console.error("PDF Gen Error:", err);
-                    showError("Failed to generate PDF for download.");
-                }
+            if (action === 'download' || action === 'share') {
+                // Wait for Tailwind to inject styles
+                const waitForTailwind = () => new Promise(resolve => {
+                    const styleEl = document.getElementById('tailwind-style');
+                    if (styleEl && styleEl.innerHTML.length > 0) return resolve();
+                    const observer = new MutationObserver(() => {
+                        const el = document.getElementById('tailwind-style');
+                        if (el && el.innerHTML.length > 0) {
+                            observer.disconnect();
+                            resolve();
+                        }
+                    });
+                    observer.observe(document.head, { childList: true, subtree: true });
+                    setTimeout(resolve, 2500); // fallback
+                });
+
+                await waitForTailwind();
+
+                // Give DOM extra time to paint fonts and logo
+                setTimeout(() => {
+                    const element = document.getElementById('receiptContainer');
+                    const opt = {
+                        margin: 0,
+                        filename: `Receipt_${result.data.challanNo}.pdf`,
+                        image: { type: 'jpeg', quality: 1.0 },
+                        html2canvas: { scale: 2, useCORS: true, windowWidth: 800, scrollY: 0 },
+                        pagebreak: { mode: ['avoid-all'] },
+                        jsPDF: { unit: 'px', format: [800, 1131], orientation: 'portrait' }
+                    };
+
+                    if (action === 'download') {
+                        html2pdf().set(opt).from(element).save().then(() => {
+                            setTimeout(() => window.close(), 1000);
+                        });
+                    } else if (action === 'share') {
+                        html2pdf().set(opt).from(element).outputPdf('blob').then(blob => {
+                            window.parent.postMessage({ type: 'SHARE_PDF', blob: blob }, '*');
+                        }).catch(err => {
+                            console.error(err);
+                            window.parent.postMessage({ type: 'SHARE_ERROR' }, '*');
+                        });
+                    }
+                }, 500);
+
             } else {
                 // Print mode
                 setTimeout(() => {
