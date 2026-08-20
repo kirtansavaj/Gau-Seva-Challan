@@ -47,12 +47,13 @@ function renderHistoryTable(donations) {
     tbody.innerHTML = '';
 
     if (donations.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No donations found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center">No donations found.</td></tr>';
         return;
     }
 
     donations.forEach(d => {
         const tr = document.createElement('tr');
+
         tr.innerHTML = `
             <td><strong>${d.challanNo}</strong></td>
             <td>${new Date(d.receiptDate).toLocaleDateString('en-IN')}</td>
@@ -60,10 +61,6 @@ function renderHistoryTable(donations) {
             <td>${d.mobile}</td>
             <td>₹ ${d.amount.toLocaleString('en-IN')}</td>
             <td>${d.paymentMode}</td>
-            <td>
-                <button class="action-btn" title="View" onclick="viewPdf('${d._id}')"><i class='bx bx-show'></i></button>
-                <button class="action-btn" title="Delete" onclick="deleteChallan('${d._id}')" style="color: var(--danger);"><i class='bx bx-trash'></i></button>
-            </td>
         `;
         tbody.appendChild(tr);
     });
@@ -103,6 +100,12 @@ function initSearch() {
             loadHistoryData();
         }, 500);
     });
+}
+
+function updatePagination() {
+    document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages;
 }
 
 function viewPdf(id) {

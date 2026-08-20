@@ -71,7 +71,7 @@ function renderDonationsTable(donations) {
     tbody.innerHTML = '';
 
     if (donations.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center">No donations found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center">No donations found.</td></tr>';
         return;
     }
 
@@ -82,20 +82,10 @@ function renderDonationsTable(donations) {
             <td>${new Date(d.receiptDate).toLocaleDateString('en-IN')}</td>
             <td>${d.donorName}</td>
             <td>₹ ${d.amount.toLocaleString('en-IN')}</td>
-            <td>
-                <button class="action-btn" title="View" onclick="viewPdf('${d._id}')"><i class='bx bx-show'></i></button>
-            </td>
         `;
         tbody.appendChild(tr);
     });
 }
-
-function viewPdf(id) {
-    window.open(`print-receipt.html?id=${id}&action=print`, '_blank');
-}
-
-window.viewPdf = viewPdf;
-
 
 function initSearch() {
     const searchInput = document.getElementById('searchInput');
