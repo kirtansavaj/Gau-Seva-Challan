@@ -71,14 +71,29 @@ export async function sharePdfDirectly(id) {
         `;
         document.head.appendChild(style);
 
-        // Inject the container into the body (off-screen)
-        receiptContainer.style.position = 'absolute';
-        receiptContainer.style.left = '-9999px';
+        // Inject the container into the body (off-screen but renderable)
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'fixed';
+        wrapper.style.left = '0';
+        wrapper.style.top = '0';
+        wrapper.style.width = '800px';
+        wrapper.style.height = '1131px'; // A4 aspect ratio
+        wrapper.style.zIndex = '-9999'; // Hide behind main content
+        wrapper.style.pointerEvents = 'none';
+        
+        receiptContainer.style.position = 'relative';
+        receiptContainer.style.left = '0';
         receiptContainer.style.top = '0';
-        receiptContainer.style.width = '800px';
+        receiptContainer.style.width = '100%';
+        receiptContainer.style.height = '100%';
         receiptContainer.style.backgroundColor = '#ffffff';
         receiptContainer.classList.remove('hidden');
-        document.body.appendChild(receiptContainer);
+        
+        wrapper.appendChild(receiptContainer);
+        document.body.appendChild(wrapper);
+
+        // Wait a tiny bit for fonts and DOM layout to settle
+        await new Promise(r => setTimeout(r, 300));
 
         // 5. Ensure html2pdf is loaded
         if (!window.html2pdf) {
@@ -103,7 +118,7 @@ export async function sharePdfDirectly(id) {
         const pdfBlob = await html2pdf().set(opt).from(receiptContainer).outputPdf('blob');
 
         // Cleanup DOM
-        document.body.removeChild(receiptContainer);
+        document.body.removeChild(wrapper);
         document.head.removeChild(style);
 
         // 7. Share File
