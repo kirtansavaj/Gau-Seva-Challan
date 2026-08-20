@@ -40,7 +40,6 @@ function initProfile() {
         btnSave.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Saving...';
 
         const username = document.getElementById('username').value.trim();
-        const newPassword = document.getElementById('newPassword').value;
 
         try {
             const response = await fetch(`${API_URL}/auth/profile`, {
@@ -50,8 +49,7 @@ function initProfile() {
                     ...getAuthHeaders()
                 },
                 body: JSON.stringify({
-                    username,
-                    newPassword
+                    username
                 })
             });
             
@@ -66,9 +64,6 @@ function initProfile() {
                 
                 sidebars.forEach(el => el.textContent = result.admin.username);
                 avatars.forEach(el => el.textContent = result.admin.username.charAt(0).toUpperCase());
-
-                // Clear password
-                document.getElementById('newPassword').value = '';
             } else {
                 showToast(result.message || 'Failed to update profile', 'error');
             }

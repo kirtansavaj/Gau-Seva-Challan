@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donation Receipt</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Noto Serif Gujarati for authentic regional text -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            gujarati: ['Noto Serif Gujarati', 'serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fdf8f6',
+              100: '#f2e8e5',
+              500: '#c2410c', // Deep Ochre / Terracotta tone suitable for Gau Seva
+              600: '#9a3412',
+              800: '#7c2d12',
+              900: '#431407',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Exact A4 Print Dimensions */
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .a4-page {
+        margin: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 100vh !important;
+      }
+    }
+    .a4-page {
+      width: 210mm;
+      height: 296mm; /* Strictly under 297 to avoid page break */
+      max-height: 296mm;
+      overflow: hidden;
+      margin: 0 auto;
+      background: white;
+      position: relative;
+      z-index: 1;
+      box-sizing: border-box;
+    }
+    .a4-page::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url('./images/logo.png'); /* Fallback logo */
+      background-size: 80%;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.05;
+      z-index: -1;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 antialiased p-0 sm:p-8">
+
+  <!-- Print Action Toolbar -->
+  <div class="no-print max-w-[210mm] mx-auto mb-6 flex justify-between items-center bg-white p-4 rounded-xl shadow-md border border-gray-200">
+    <div>
+      <h1 class="text-lg font-bold text-gray-900">Print Preview</h1>
+      <p class="text-xs text-gray-500">Standard A4 Format (Portrait)</p>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="window.close()" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium text-sm rounded-lg shadow transition-all duration-200 cursor-pointer">
+        Close
+      </button>
+      <button onclick="window.print()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-800 text-white font-medium text-sm rounded-lg shadow transition-all duration-200 flex items-center gap-2 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        Print / Save PDF
+      </button>
+    </div>
+  </div>
+
+  <div id="loading" class="text-center py-10 font-bold text-gray-600">
+    <i class='bx bx-loader-alt bx-spin text-3xl mb-2 text-brand-600'></i><br>
+    Loading Receipt Data...
+  </div>
+
+  <div id="errorMsg" class="text-center py-10 font-bold text-red-600 hidden">
+    Failed to load receipt data.
+  </div>
+
+  <!-- Main A4 Container -->
+  <div id="receiptContainer" class="a4-page p-8 sm:shadow-2xl flex flex-col justify-between border border-gray-100 hidden">
+    <div>
+      
+      <!-- Top Decorative Accent -->
+      <div class="h-2 w-full bg-gradient-to-r from-brand-500 via-amber-500 to-brand-800 rounded-t-sm mb-6"></div>
+
+      <!-- Header Section -->
+      <header class="flex justify-between items-start pb-4 border-b border-gray-200">
+        <div class="flex items-center gap-5">
+          <!-- Logo Placeholder / Emblem -->
+          <div class="w-32 h-32 flex flex-col items-center justify-center text-center text-brand-600 font-bold">
+            <img src="./images/logo.png" alt="Logo" class="w-full h-full object-contain" onerror="this.style.display='none'; document.getElementById('altLogo').style.display='flex';" />
+            <div id="altLogo" style="display: none; flex-direction: column; align-items: center;">
+              <span class="text-4xl">🐄</span>
+              <span class="font-gujarati text-sm leading-tight font-semibold mt-2">ગૌ સેવા</span>
+            </div>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight text-gray-900 uppercase">Vaishnav Gau Seva Parivar</h1>
+            <p class="text-sm font-medium text-brand-600">Surat, Gujarat</p>
+            <p class="text-xs text-gray-500 mt-1">Mo: 9825155382, 9979227675, 9924900147</p>
+          </div>
+        </div>
+
+        <div class="text-right">
+          <span class="inline-block px-3 py-1 bg-brand-100 text-brand-800 font-semibold text-xs rounded-full uppercase tracking-wider mb-2">
+            Official Receipt
+          </span>
+          <h2 class="text-xs text-gray-400 uppercase tracking-widest font-semibold">Receipt Number</h2>
+          <p class="text-lg font-mono font-bold text-gray-900" id="challanNo"></p>
+        </div>
+      </header>
+
+      <!-- Key Value Cards (Date, Payment Mode, Purpose) -->
+      <section class="grid grid-cols-3 gap-4 my-5">
+        <div class="bg-gray-50 border border-gray-100 rounded-lg p-3 text-center">
+          <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Date</span>
+          <span class="text-sm font-semibold text-gray-800" id="receiptDate"></span>
+        </div>
+        <div class="bg-gray-50 border border-gray-100 rounded-lg p-3 text-center">
+          <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Payment Mode</span>
+          <span class="text-sm font-semibold text-gray-800" id="paymentMode"></span>
+        </div>
+        <div class="bg-gray-50 border border-gray-100 rounded-lg p-3 text-center">
+          <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Purpose</span>
+          <span class="text-sm font-semibold text-brand-600" id="donationFor"></span>
+        </div>
+      </section>
+
+      <!-- Donor Info Table / Grid -->
+      <section class="border border-gray-200 rounded-xl overflow-hidden mb-6">
+        <div class="bg-gray-50/80 px-6 py-3 border-b border-gray-200">
+          <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Donor Information</h3>
+        </div>
+        
+        <div class="p-6 grid grid-cols-2 gap-6">
+          <div>
+            <label class="text-xs font-medium text-gray-400 uppercase block mb-1">Donor Name(s)</label>
+            <p class="text-base font-semibold text-gray-900" id="donorName"></p>
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-400 uppercase block mb-1">Mobile Number</label>
+            <p class="text-base font-mono font-medium text-gray-900" id="mobile"></p>
+          </div>
+
+          <div class="col-span-2 pt-2 border-t border-gray-100">
+            <label class="text-xs font-medium text-gray-400 uppercase block mb-1">Address</label>
+            <p class="text-sm text-gray-700 leading-relaxed" id="address"></p>
+          </div>
+          
+          <div id="remarksContainer" class="col-span-2 pt-2 border-t border-gray-100 hidden">
+            <label class="text-xs font-medium text-gray-400 uppercase block mb-1">Remarks</label>
+            <p class="text-sm text-gray-700 leading-relaxed" id="remarks"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Amount Banner -->
+      <section class="bg-brand-50 border-2 border-brand-500/20 rounded-xl p-6 flex justify-between items-center mb-6">
+        <div>
+          <span class="text-xs font-bold text-brand-800 uppercase tracking-wider block mb-1">Amount Received in Words</span>
+          <p class="text-lg font-semibold text-brand-900 italic">Rupees <span id="amountInWords"></span> Only</p>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-bold text-brand-800 uppercase tracking-wider block mb-1">Total Amount</span>
+          <div class="text-3xl font-extrabold text-brand-600 font-mono">
+            ₹<span id="amount"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Gujarati Blessings / Tagline -->
+      <div class="text-center py-6 bg-amber-50/50 rounded-xl border border-amber-200/50">
+        <p class="font-gujarati text-xl font-bold text-brand-800 tracking-wide">
+          "રાધે રાધે — આપનો ગૌ સેવા સહયોગ વંદનીય છે."
+        </p>
+        <p class="text-xs text-amber-700/80 mt-1">Vaishnav Gau Seva Parivar - Dedicated to Noble Service</p>
+      </div>
+
+    </div>
+
+    <!-- Footer & Signatures -->
+    <footer class="mt-8 pt-4 border-t border-gray-200">
+      <div class="flex justify-between items-end pb-8">
+        <div class="flex items-center gap-4">
+          <p class="text-xs text-gray-400 max-w-xs leading-normal">
+            This is a computer-generated receipt for donations received towards Gau Seva activities.
+          </p>
+        </div>
+        <div class="text-center">
+          <p class="text-sm font-bold text-gray-800 uppercase tracking-wider relative z-10" id="collectedBy"></p>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider relative z-10">Collected By</p>
+          <p class="text-[10px] text-gray-400 relative z-10">Vaishnav Gau Seva Parivar</p>
+        </div>
+      </div>
+
+      <!-- Page Sub-footer -->
+      <div class="text-center text-[11px] text-gray-400 pt-4 border-t border-gray-100 flex justify-between items-center">
+        <span>Receipt ID: <span id="footerChallanNo"></span></span>
+        <span>Thank you for your generous support</span>
+        <span>Page 1 of 1</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script type="module" src="./js/print-receipt.js"></script>
+</body>
+</html>

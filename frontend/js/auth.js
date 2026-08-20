@@ -17,14 +17,36 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Auto-logout due to inactivity (1 hour)
+    const INACTIVITY_LIMIT = 60 * 60 * 1000; // 1 hour in ms
+    let inactivityTimer;
+
+    const performLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('adminUsername');
+        window.location.href = 'login.html';
+    };
+
+    const resetInactivityTimer = () => {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(performLogout, INACTIVITY_LIMIT);
+    };
+
+    // Only set up inactivity timer if logged in and not on login page
+    if (!isLoginPage && token) {
+        resetInactivityTimer();
+        const activityEvents = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'];
+        activityEvents.forEach(event => {
+            window.addEventListener(event, resetInactivityTimer, { passive: true });
+        });
+    }
+
     // Set up logout button if it exists
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            localStorage.removeItem('token');
-            localStorage.removeItem('adminUsername');
-            window.location.href = 'login.html';
+            performLogout();
         });
     }
 

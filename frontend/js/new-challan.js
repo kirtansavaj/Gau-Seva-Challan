@@ -134,11 +134,11 @@ document.getElementById('btnSharePdf').addEventListener('click', () => {
 });
 
 function downloadPdf(id) {
-    window.open(getAuthUrl(`${API_URL}/${id}/pdf`), '_blank');
+    window.open(`print-receipt.html?id=${id}`, '_blank');
 }
 
 function viewPdf(id) {
-    window.open(getAuthUrl(`${API_URL}/${id}/print`), '_blank');
+    window.open(`print-receipt.html?id=${id}`, '_blank');
 }
 
 async function sharePdf(id) {
