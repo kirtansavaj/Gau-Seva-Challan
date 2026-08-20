@@ -44,9 +44,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('receiptContainer').classList.remove('hidden');
             
-            // Auto print after a tiny delay to ensure rendering
+            // Handle print or download based on action param
+            const action = urlParams.get('action');
             setTimeout(() => {
-                window.print();
+                if (action === 'download') {
+                    const element = document.getElementById('receiptContainer');
+                    const opt = {
+                        margin: 10,
+                        filename: `Receipt_${data.challanNo}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2 },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        // Close tab after download if we opened it just for downloading
+                        // setTimeout(() => window.close(), 1000); // Optional
+                    });
+                } else {
+                    window.print();
+                }
             }, 500);
         } else {
             showError(result.message || 'Failed to load challan data.');

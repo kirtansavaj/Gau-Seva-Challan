@@ -106,11 +106,11 @@ function initSearch() {
 }
 
 function downloadPdf(id) {
-    window.open(`print-receipt.html?id=${id}`, '_blank');
+    window.open(`print-receipt.html?id=${id}&action=download`, '_blank');
 }
 
 function viewPdf(id) {
-    window.open(`print-receipt.html?id=${id}`, '_blank');
+    window.open(`print-receipt.html?id=${id}&action=print`, '_blank');
 }
 
 async function sharePdf(id, donorName) {
