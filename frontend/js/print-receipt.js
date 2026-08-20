@@ -46,38 +46,58 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Handle print or download based on action param
             const action = urlParams.get('action');
-            setTimeout(() => {
-                const element = document.getElementById('receiptContainer');
+            
+            // Tailwind CDN loads asynchronously and creates a style tag with id 'tailwind-style'
+            const waitForTailwind = () => new Promise(resolve => {
+                const styleEl = document.getElementById('tailwind-style');
+                if (styleEl && styleEl.innerHTML.length > 0) return resolve();
                 
-                if (action === 'download') {
-                    const opt = {
-                        margin: 0,
-                        filename: `Receipt_${result.data.challanNo}.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
-                        pagebreak: { mode: 'avoid-all' },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                    };
-                    html2pdf().set(opt).from(element).save();
-                } else if (action === 'share') {
-                    const opt = {
-                        margin: 0,
-                        filename: `Receipt_${result.data.challanNo}.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true, logging: false },
-                        pagebreak: { mode: 'avoid-all' },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                    };
-                    html2pdf().set(opt).from(element).outputPdf('blob').then(blob => {
-                        window.parent.postMessage({ type: 'SHARE_PDF', blob: blob }, '*');
-                    }).catch(err => {
-                        console.error(err);
-                        window.parent.postMessage({ type: 'SHARE_ERROR' }, '*');
-                    });
-                } else {
-                    window.print();
-                }
-            }, 500);
+                const observer = new MutationObserver(() => {
+                    const el = document.getElementById('tailwind-style');
+                    if (el && el.innerHTML.length > 0) {
+                        observer.disconnect();
+                        resolve();
+                    }
+                });
+                observer.observe(document.head, { childList: true, subtree: true });
+                setTimeout(resolve, 2500); // 2.5s fallback
+            });
+
+            waitForTailwind().then(() => {
+                // Extra small delay to ensure fonts and layout are painted
+                setTimeout(() => {
+                    const element = document.getElementById('receiptContainer');
+                    
+                    if (action === 'download') {
+                        const opt = {
+                            margin: 0,
+                            filename: `Receipt_${result.data.challanNo}.pdf`,
+                            image: { type: 'jpeg', quality: 0.98 },
+                            html2canvas: { scale: 2, useCORS: true },
+                            pagebreak: { mode: 'avoid-all' },
+                            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                        };
+                        html2pdf().set(opt).from(element).save();
+                    } else if (action === 'share') {
+                        const opt = {
+                            margin: 0,
+                            filename: `Receipt_${result.data.challanNo}.pdf`,
+                            image: { type: 'jpeg', quality: 0.98 },
+                            html2canvas: { scale: 2, useCORS: true, logging: false },
+                            pagebreak: { mode: 'avoid-all' },
+                            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                        };
+                        html2pdf().set(opt).from(element).outputPdf('blob').then(blob => {
+                            window.parent.postMessage({ type: 'SHARE_PDF', blob: blob }, '*');
+                        }).catch(err => {
+                            console.error(err);
+                            window.parent.postMessage({ type: 'SHARE_ERROR' }, '*');
+                        });
+                    } else {
+                        window.print();
+                    }
+                }, 500);
+            });
         } else {
             showError(result.message || 'Failed to load challan data.');
         }
