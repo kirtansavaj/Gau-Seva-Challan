@@ -1,4 +1,5 @@
 import { getAuthHeaders } from './auth.js';
+import { generateTruePdfBlob } from './pdfGenerator.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -47,57 +48,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Handle print or download based on action param
             const action = urlParams.get('action');
             
-            // Tailwind CDN loads asynchronously and creates a style tag with id 'tailwind-style'
-            const waitForTailwind = () => new Promise(resolve => {
-                const styleEl = document.getElementById('tailwind-style');
-                if (styleEl && styleEl.innerHTML.length > 0) return resolve();
-                
-                const observer = new MutationObserver(() => {
-                    const el = document.getElementById('tailwind-style');
-                    if (el && el.innerHTML.length > 0) {
-                        observer.disconnect();
-                        resolve();
-                    }
-                });
-                observer.observe(document.head, { childList: true, subtree: true });
-                setTimeout(resolve, 2500); // 2.5s fallback
-            });
-
-            waitForTailwind().then(() => {
-                // Extra small delay to ensure fonts and layout are painted
-                setTimeout(() => {
-                    const element = document.getElementById('receiptContainer');
+            if (action === 'download' || action === 'share') {
+                // Generate PDF and download/send
+                try {
+                    const blob = await generateTruePdfBlob(result.data);
                     
                     if (action === 'download') {
-                        const opt = {
-                            margin: 0,
-                            filename: `Receipt_${result.data.challanNo}.pdf`,
-                            image: { type: 'jpeg', quality: 0.98 },
-                            html2canvas: { scale: 2, useCORS: true },
-                            pagebreak: { mode: 'avoid-all' },
-                            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                        };
-                        html2pdf().set(opt).from(element).save();
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = `Receipt_${result.data.challanNo}.pdf`;
+                        link.click();
+                        setTimeout(() => window.close(), 2000);
                     } else if (action === 'share') {
-                        const opt = {
-                            margin: 0,
-                            filename: `Receipt_${result.data.challanNo}.pdf`,
-                            image: { type: 'jpeg', quality: 0.98 },
-                            html2canvas: { scale: 2, useCORS: true, logging: false },
-                            pagebreak: { mode: 'avoid-all' },
-                            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                        };
-                        html2pdf().set(opt).from(element).outputPdf('blob').then(blob => {
-                            window.parent.postMessage({ type: 'SHARE_PDF', blob: blob }, '*');
-                        }).catch(err => {
-                            console.error(err);
-                            window.parent.postMessage({ type: 'SHARE_ERROR' }, '*');
-                        });
-                    } else {
-                        window.print();
+                        window.parent.postMessage({ type: 'SHARE_PDF', blob: blob }, '*');
                     }
-                }, 500);
-            });
+                } catch(err) {
+                    console.error("PDF Gen Error:", err);
+                    if (action === 'share') window.parent.postMessage({ type: 'SHARE_ERROR' }, '*');
+                }
+            } else {
+                // Print mode
+                setTimeout(() => {
+                    window.print();
+                }, 1000); // Give time for fonts to load
+            }
         } else {
             showError(result.message || 'Failed to load challan data.');
         }
