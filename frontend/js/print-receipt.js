@@ -59,15 +59,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
                 await waitForTailwind();
+                
+                // Wait for all Google Fonts to load completely
+                if (document.fonts) {
+                    await document.fonts.ready;
+                }
 
-                // Give DOM extra time to paint fonts and logo
+                // Give DOM extra time to paint fonts and logo, especially on mobile
                 setTimeout(() => {
                     const element = document.getElementById('receiptContainer');
                     const opt = {
                         margin: 0,
                         filename: `Receipt_${result.data.challanNo}.pdf`,
                         image: { type: 'jpeg', quality: 1.0 },
-                        html2canvas: { scale: 2, useCORS: true, windowWidth: 800, scrollY: 0 },
+                        html2canvas: { scale: 2, useCORS: true, windowWidth: 800, scrollY: 0, letterRendering: true },
                         pagebreak: { mode: ['avoid-all'] },
                         jsPDF: { unit: 'px', format: [800, 1131], orientation: 'portrait' }
                     };
@@ -84,7 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             window.parent.postMessage({ type: 'SHARE_ERROR' }, '*');
                         });
                     }
-                }, 500);
+                }, 1000); // Increased delay for safety
 
             } else {
                 // Print mode
