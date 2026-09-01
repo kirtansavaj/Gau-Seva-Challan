@@ -171,11 +171,6 @@ function generatePdfReceipt(donation) {
             // Custom banner shape
             doc.path('M 60 190 L 80 170 L 515 170 L 535 190 L 515 210 L 80 210 Z').fill();
             doc.fillColor('white').font('Serif').fontSize(22).text('DONATION RECEIPT', 0, 180, { align: 'center' });
-            // Decorative arrows inside banner
-            doc.path('M 120 190 L 100 185 L 100 195 Z').fill(cBrown);
-            doc.path('M 110 190 L 130 190').strokeColor(cBrown).lineWidth(2).stroke();
-            doc.path('M 475 190 L 495 185 L 495 195 Z').fill(cBrown);
-            doc.path('M 485 190 L 465 190').strokeColor(cBrown).lineWidth(2).stroke();
             doc.restore();
 
             // --- RECEIPT NO & DATE BOXES ---
