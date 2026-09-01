@@ -184,6 +184,7 @@ function generatePdfReceipt(donation) {
             
             // Signature line
             doc.moveTo(doc.page.width - 200, footerY - 10).lineTo(doc.page.width - 50, footerY - 10).strokeColor('#333').stroke();
+            doc.fillColor(textColor);
             const collectorName = donation.collectedBy || 'Admin';
             renderMixedText(doc, `Collected By: ${collectorName}`, doc.page.width - 200, footerY, { width: 150, align: 'center', fontSize: 10 });
 
