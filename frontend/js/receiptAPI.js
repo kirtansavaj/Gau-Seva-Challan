@@ -1,4 +1,4 @@
-import { getAuthHeaders } from './auth.js';
+import { getAuthHeaders } from './auth/auth.js';
 
 const API_URL = import.meta.env.VITE_API_URL + '/challan';
 
