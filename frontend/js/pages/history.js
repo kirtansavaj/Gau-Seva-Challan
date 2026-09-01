@@ -1,4 +1,5 @@
 import { challanApi } from '../api/challanApi.js';
+import { viewReceipt, shareReceipt, downloadReceipt } from '../receiptAPI.js';
 
 let currentPage = 1;
 const limit = 15;
@@ -44,7 +45,7 @@ function renderHistoryTable(donations) {
     tbody.innerHTML = '';
 
     if (donations.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center">No donations found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No donations found.</td></tr>';
         return;
     }
 
@@ -58,6 +59,19 @@ function renderHistoryTable(donations) {
             <td data-label="Mobile">${d.mobile}</td>
             <td data-label="Amount">₹ ${d.amount.toLocaleString('en-IN')}</td>
             <td data-label="Mode">${d.paymentMode}</td>
+            <td class="action-cell">
+                <div class="flex gap-2">
+                    <button class="action-btn" onclick="window.viewReceipt('${d._id}')" title="View PDF">
+                        <i class='bx bx-show'></i>
+                    </button>
+                    <button class="action-btn" onclick="window.downloadReceipt('${d._id}')" title="Download PDF">
+                        <i class='bx bx-download'></i>
+                    </button>
+                    <button class="action-btn" onclick="window.shareReceipt('${d._id}')" title="Share Receipt">
+                        <i class='bx bx-share-alt'></i>
+                    </button>
+                </div>
+            </td>
         `;
         tbody.appendChild(tr);
     });
@@ -124,3 +138,6 @@ async function deleteChallan(id) {
     }
 }
 window.deleteChallan = deleteChallan;
+window.viewReceipt = viewReceipt;
+window.shareReceipt = shareReceipt;
+window.downloadReceipt = downloadReceipt;

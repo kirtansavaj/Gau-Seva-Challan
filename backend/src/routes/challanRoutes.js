@@ -7,6 +7,7 @@ router.post('/', protect, challanController.createChallan);
 router.get('/', protect, challanController.getChallans);
 router.get('/search', protect, challanController.searchChallans);
 router.get('/:id', challanController.getChallanById);
+router.get('/:id/receipt', protect, challanController.generateReceipt);
 router.delete('/:id', protect, challanController.deleteChallan);
 
 module.exports = router;

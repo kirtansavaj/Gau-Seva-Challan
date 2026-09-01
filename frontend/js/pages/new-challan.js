@@ -1,4 +1,5 @@
 import { challanApi } from '../api/challanApi.js';
+import { viewReceipt, shareReceipt, downloadReceipt } from '../receiptAPI.js';
 let currentChallanId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -114,4 +115,16 @@ document.querySelector('.close-modal').addEventListener('click', () => {
 
 document.querySelector('.close-modal-btn').addEventListener('click', () => {
     document.getElementById('receiptModal').classList.add('hidden');
+});
+
+document.getElementById('btnViewPdf').addEventListener('click', () => {
+    if (currentChallanId) viewReceipt(currentChallanId);
+});
+
+document.getElementById('btnDownloadPdf').addEventListener('click', () => {
+    if (currentChallanId) downloadReceipt(currentChallanId);
+});
+
+document.getElementById('btnSharePdf').addEventListener('click', () => {
+    if (currentChallanId) shareReceipt(currentChallanId);
 });

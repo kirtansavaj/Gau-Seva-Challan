@@ -1,4 +1,5 @@
 const donationService = require('../services/donationService');
+const receiptService = require('../services/receiptService');
 const { createChallanSchema } = require('../validators/challanValidator');
 const logger = require('../config/logger');
 const path = require('path');
@@ -43,7 +44,23 @@ exports.getChallanById = async (req, res, next) => {
         next(error);
     }
 };
-
+exports.generateReceipt = async (req, res, next) => {
+    try {
+        const donation = await donationService.getDonationById(req.params.id);
+        if (!donation) {
+            return res.status(404).json({ success: false, message: 'Challan not found' });
+        }
+        
+        const pdfBuffer = await receiptService.generatePdfReceipt(donation);
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="Donation-Receipt-${donation.challanNo}.pdf"`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        logger.error(`Receipt Generation Error: ${error.message}`);
+        next(error);
+    }
+};
 
 exports.deleteChallan = async (req, res, next) => {
     try {
