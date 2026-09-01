@@ -82,14 +82,20 @@ function generatePdfReceipt(donation) {
             const textColor = '#333333';
             const lightBorder = '#e5e7eb';
 
+            // --- BACKGROUND WATERMARK ---
+            const bgImagePath = path.join(__dirname, '../../assets/Gau Mata.jpeg');
+            if (require('fs').existsSync(bgImagePath)) {
+                doc.save();
+                doc.opacity(0.15);
+                // Center the watermark
+                const imgWidth = 400;
+                doc.image(bgImagePath, (doc.page.width - imgWidth) / 2, (doc.page.height - imgWidth) / 2 - 50, { width: imgWidth });
+                doc.restore();
+            }
+
             // --- HEADER ---
             // Draw a subtle background for the header
             doc.rect(0, 0, doc.page.width, 100).fill('#f0fdf4');
-            
-            const logoPath = path.join(__dirname, '../assets/images/logo.png');
-            if (require('fs').existsSync(logoPath)) {
-                doc.image(logoPath, 50, 20, { width: 60 });
-            }
             
             doc.fillColor(primaryColor);
             renderMixedText(doc, 'Shree Gau Seva Trust - શ્રી ગૌ સેવા ટ્રસ્ટ', 0, 30, { align: 'center', fontSize: 24, width: doc.page.width });
