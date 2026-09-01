@@ -1,6 +1,5 @@
-import { getAuthHeaders } from './auth.js';
+import { challanApi } from '../api/challanApi.js';
 
-const API_URL = import.meta.env.VITE_API_URL + '/challan';
 let currentPage = 1;
 const limit = 15;
 let currentSearchQuery = '';
@@ -24,17 +23,15 @@ function showToast(message, type = 'success') {
 
 async function loadHistoryData() {
     try {
-        let url = `${API_URL}?page=${currentPage}&limit=${limit}`;
-        if (currentSearchQuery) {
-            url = `${API_URL}/search?q=${encodeURIComponent(currentSearchQuery)}&page=${currentPage}&limit=${limit}`;
-        }
+        const data = await challanApi.getHistoryData(currentPage, limit, currentSearchQuery);
 
-        const response = await fetch(url, { headers: getAuthHeaders() });
-        const data = await response.json();
-
-        if (data.success) {
+        if (data && data.success) {
             renderHistoryTable(data.data.donations);
             updatePaginationControls(data.data.currentPage, data.data.totalPages);
+        } else if (data && !data.success) {
+            showToast(data.message || 'Failed to load history', 'error');
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Error loading data.</td></tr>';
         }
     } catch (error) {
         showToast('Failed to load history', 'error');
@@ -55,12 +52,12 @@ function renderHistoryTable(donations) {
         const tr = document.createElement('tr');
 
         tr.innerHTML = `
-            <td><strong>${d.challanNo}</strong></td>
-            <td>${new Date(d.receiptDate).toLocaleDateString('en-IN')}</td>
-            <td>${d.donorName}</td>
-            <td>${d.mobile}</td>
-            <td>₹ ${d.amount.toLocaleString('en-IN')}</td>
-            <td>${d.paymentMode}</td>
+            <td data-label="Challan No"><strong>${d.challanNo}</strong></td>
+            <td data-label="Date">${new Date(d.receiptDate).toLocaleDateString('en-IN')}</td>
+            <td data-label="Donor Name">${d.donorName}</td>
+            <td data-label="Mobile">${d.mobile}</td>
+            <td data-label="Amount">₹ ${d.amount.toLocaleString('en-IN')}</td>
+            <td data-label="Mode">${d.paymentMode}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -114,11 +111,7 @@ async function deleteChallan(id) {
     }
 
     try {
-        const response = await fetch(`${API_URL}/${id}`, {
-            method: 'DELETE',
-            headers: getAuthHeaders()
-        });
-        const data = await response.json();
+        const data = await challanApi.deleteChallan(id);
 
         if (data.success) {
             showToast('Challan deleted successfully');

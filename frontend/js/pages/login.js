@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+import { authApi } from '../api/challanApi.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // If already logged in, redirect to dashboard
@@ -28,15 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`${API_URL}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            });
-
-            const data = await response.json();
+            const data = await authApi.login(username, password);
 
             if (data.success) {
                 // Store token and redirect

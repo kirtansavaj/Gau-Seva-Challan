@@ -1,6 +1,4 @@
-import { getAuthHeaders } from './auth.js';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { challanApi } from '../api/challanApi.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboardData();
@@ -20,17 +18,15 @@ function showToast(message, type = 'success') {
 
 async function loadDashboardData(searchQuery = '') {
     try {
-        let url = API_URL;
-        if (searchQuery) {
-            url = `${API_URL}/search?q=${encodeURIComponent(searchQuery)}`;
-        }
+        const data = await challanApi.getDashboardData(searchQuery);
 
-        const response = await fetch(url, { headers: getAuthHeaders() });
-        const data = await response.json();
-
-        if (data.success) {
+        if (data && data.success) {
             updateDashboardStats(data.data.donations);
             renderDonationsTable(data.data.donations);
+        } else if (data && !data.success) {
+            showToast(data.message || 'Failed to load data', 'error');
+            const tbody = document.getElementById('recentDonationsTable');
+            if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-center">Error loading data.</td></tr>';
         }
     } catch (error) {
         showToast('Failed to load data', 'error');
@@ -78,10 +74,10 @@ function renderDonationsTable(donations) {
     donations.slice(0, 10).forEach(d => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><strong>${d.challanNo}</strong></td>
-            <td>${new Date(d.receiptDate).toLocaleDateString('en-IN')}</td>
-            <td>${d.donorName}</td>
-            <td>₹ ${d.amount.toLocaleString('en-IN')}</td>
+            <td data-label="Challan No"><strong>${d.challanNo}</strong></td>
+            <td data-label="Date">${new Date(d.receiptDate).toLocaleDateString('en-IN')}</td>
+            <td data-label="Donor Name">${d.donorName}</td>
+            <td data-label="Amount">₹ ${d.amount.toLocaleString('en-IN')}</td>
         `;
         tbody.appendChild(tr);
     });

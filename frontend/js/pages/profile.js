@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+import { authApi } from '../api/challanApi.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initProfile();
@@ -42,18 +42,7 @@ function initProfile() {
         const username = document.getElementById('username').value.trim();
 
         try {
-            const response = await fetch(`${API_URL}/auth/profile`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...getAuthHeaders()
-                },
-                body: JSON.stringify({
-                    username
-                })
-            });
-            
-            const result = await response.json();
+            const result = await authApi.updateProfile(username);
             
             if (result.success) {
                 showToast('Profile updated successfully!');

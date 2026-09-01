@@ -1,6 +1,4 @@
-
-
-const API_URL = import.meta.env.VITE_API_URL + '/challan';
+import { challanApi } from '../api/challanApi.js';
 let currentChallanId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -71,16 +69,7 @@ function initForm() {
 
 
         try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    ...getAuthHeaders()
-                },
-                body: JSON.stringify(data)
-            });
-            
-            const result = await response.json();
+            const result = await challanApi.createChallan(data);
             
             if (result.success) {
                 showToast('Challan generated successfully!');
