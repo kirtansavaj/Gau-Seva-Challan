@@ -27,8 +27,55 @@ function generatePdfReceipt(donation) {
             doc.registerFont('English', englishFont);
             doc.registerFont('Gujarati', gujaratiFont);
             
-            // Set default font to Gujarati to support mixing
-            doc.font('Gujarati');
+            function renderMixedText(doc, text, x, y, options = {}) {
+                if (!text) return;
+                let segments = [];
+                let currentLang = null;
+                let currentSegment = '';
+
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i];
+                    const isGujarati = /[\u0A80-\u0AFF]/.test(char);
+                    const isNeutral = /[\s0-9.,\-()\[\]:|]/.test(char);
+
+                    let lang = currentLang || (isGujarati ? 'Gujarati' : 'English');
+                    if (isGujarati) lang = 'Gujarati';
+                    else if (!isNeutral) lang = 'English';
+                    
+                    if (lang !== currentLang && currentLang !== null && !isNeutral) {
+                        segments.push({ text: currentSegment, lang: currentLang });
+                        currentSegment = char;
+                        currentLang = lang;
+                    } else {
+                        currentLang = lang;
+                        currentSegment += char;
+                    }
+                }
+                if (currentSegment) {
+                    segments.push({ text: currentSegment, lang: currentLang });
+                }
+
+                let totalWidth = 0;
+                for (const seg of segments) {
+                    doc.font(seg.lang);
+                    if (options.fontSize) doc.fontSize(options.fontSize);
+                    totalWidth += doc.widthOfString(seg.text);
+                }
+
+                let currentX = x;
+                if (options.align === 'center') {
+                    currentX = x + (options.width || doc.page.width) / 2 - totalWidth / 2;
+                } else if (options.align === 'right') {
+                    currentX = x + (options.width || doc.page.width) - totalWidth;
+                }
+
+                for (const seg of segments) {
+                    doc.font(seg.lang);
+                    if (options.fontSize) doc.fontSize(options.fontSize);
+                    doc.text(seg.text, currentX, y, { continued: false, lineBreak: false });
+                    currentX += doc.widthOfString(seg.text);
+                }
+            }
 
             // Colors
             const primaryColor = '#16a34a'; // Green brand color
@@ -38,16 +85,13 @@ function generatePdfReceipt(donation) {
             // --- HEADER ---
             // Draw a subtle background for the header
             doc.rect(0, 0, doc.page.width, 100).fill('#f0fdf4');
+            
             doc.fillColor(primaryColor);
+            renderMixedText(doc, 'Shree Gau Seva Trust - શ્રી ગૌ સેવા ટ્રસ્ટ', 0, 30, { align: 'center', fontSize: 24, width: doc.page.width });
             
-            doc.font('Gujarati')
-               .fontSize(24)
-               .text('Shree Gau Seva Trust', 50, 30, { align: 'center' });
-            
-            doc.fontSize(10)
-               .fillColor('#4b5563')
-               .text('123 Gaushala Road, Rajkot, Gujarat - 360001', 50, 60, { align: 'center' })
-               .text('Phone: +91 98765 43210 | Email: contact@gauseva.org', 50, 75, { align: 'center' });
+            doc.fillColor('#4b5563');
+            renderMixedText(doc, '123 Gaushala Road, Rajkot, Gujarat - 360001', 0, 60, { align: 'center', fontSize: 10, width: doc.page.width });
+            renderMixedText(doc, 'Phone: +91 98765 43210 | Email: contact@gauseva.org', 0, 75, { align: 'center', fontSize: 10, width: doc.page.width });
 
             // Reset fill
             doc.fillColor(textColor);
@@ -84,15 +128,15 @@ function generatePdfReceipt(donation) {
             
             // Name
             doc.font('English').text('Name:', labelX, donorStartY);
-            doc.font('Gujarati').text(donation.donorName, valueX, donorStartY);
+            renderMixedText(doc, donation.donorName, valueX, donorStartY, { fontSize: 11 });
             
             // Mobile
             doc.font('English').text('Mobile:', labelX, donorStartY + 20);
-            doc.text(donation.mobile, valueX, donorStartY + 20);
+            renderMixedText(doc, donation.mobile, valueX, donorStartY + 20, { fontSize: 11 });
 
             // Address
             doc.font('English').text('Address:', labelX, donorStartY + 40);
-            doc.font('Gujarati').text(donation.address, valueX, donorStartY + 40);
+            renderMixedText(doc, donation.address, valueX, donorStartY + 40, { fontSize: 11 });
 
             doc.moveDown(3);
 
@@ -107,7 +151,7 @@ function generatePdfReceipt(donation) {
             // Draw table lines and text
             function drawRow(label, value, y) {
                 doc.fillColor(textColor).font('English').text(label, labelX, y);
-                doc.font('Gujarati').text(value, valueX, y);
+                renderMixedText(doc, value, valueX, y, { fontSize: 11 });
                 doc.moveTo(50, y + 15).lineTo(doc.page.width - 50, y + 15).strokeColor(lightBorder).stroke();
             }
 
