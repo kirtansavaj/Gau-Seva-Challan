@@ -9,11 +9,11 @@ const createChallanSchema = Joi.object({
     'string.length': 'Mobile must be exactly 10 digits',
     'string.pattern.base': 'Mobile must contain only numbers'
   }),
-  address: Joi.string().required(),
+  address: Joi.string().allow('', null),
   amount: Joi.number().positive().min(1).required(),
   paymentMode: Joi.string().valid('Cash', 'UPI', 'Cheque', 'Bank Transfer').required(),
-  donationFor: Joi.string().allow('', null).default('General Fund'),
-  collectedBy: Joi.string().allow('', null),
+  donationFor: Joi.string().required(),
+  collectedBy: Joi.string().required(),
   remarks: Joi.string().allow('', null)
 });
 

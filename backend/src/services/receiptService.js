@@ -133,44 +133,85 @@ function generatePdfReceipt(donation) {
                 hands: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
                 gift: 'M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z',
                 payment: 'M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z',
-                check: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'
+                check: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z',
+                whatsapp: 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z'
             };
 
             // --- HEADER ---
             const logoPath = path.join(__dirname, '../assets/images/logo-transparent.png');
             if (fs.existsSync(logoPath)) {
-                doc.image(logoPath, 50, 40, { width: 100 });
+                doc.image(logoPath, 50, 25, { width: 110 });
             }
 
-            // Trust Name (English) - Reduced size and centered to fit new longer name
-            doc.fillColor(cDarkGreen).font('Serif').fontSize(24).text('VAISHNAV GAU SEVA PARIVAR', 160, 45, {
-                width: 400,
+            // Trust Name (English) - Bold & dark green
+            doc.fillColor(cDarkGreen).font('Helvetica-Bold').fontSize(26).text('VAISHNAV GAU SEVA PARIVAR', 150, 55, {
+                width: 420,
                 align: 'center'
             });
-            
-            // Trust Name (Gujarati)
-            doc.fillColor(cTextBrown);
-            renderMixedText(doc, 'શ્રી ગૌ સેવા ટ્રસ્ટ', 160, 78, { align: 'center', fontSize: 24, width: 400 });
 
-            // Contact info - Phone numbers only, perfectly centered under the title
-            doc.fillColor(cTextBlack).font('English').fontSize(12);
+            // Decorative ornate line
+            const lineY = 90;
+            doc.lineWidth(1).strokeColor(cBrown);
+            // Left circle and line
+            doc.circle(200, lineY, 2).fill(cBrown);
+            doc.moveTo(200, lineY).lineTo(340, lineY).stroke();
+            // Center motif
+            doc.path(`M 360 ${lineY-6} L 366 ${lineY} L 360 ${lineY+6} L 354 ${lineY} Z`).fill(cBrown);
+            doc.path(`M 350 ${lineY-3} L 354 ${lineY} L 350 ${lineY+3} L 346 ${lineY} Z`).fill(cBrown);
+            doc.path(`M 370 ${lineY-3} L 374 ${lineY} L 370 ${lineY+3} L 366 ${lineY} Z`).fill(cBrown);
+            // Right line and circle
+            doc.moveTo(380, lineY).lineTo(520, lineY).strokeColor(cBrown).stroke();
+            doc.circle(520, lineY, 2).fill(cBrown);
+
+            // Contact info - Phone numbers with distinct circular icons
+            const yPhone = 120;
+            doc.fillColor(cTextBlack).font('English').fontSize(13);
             
-            const phoneStr = '98251 55382   |   99792 27675   |   99249 00147';
-            const phoneTextWidth = doc.widthOfString(phoneStr);
-            const phoneTotalWidth = 20 + phoneTextWidth; // 12px icon + 8px gap
-            const phoneStartX = 360 - (phoneTotalWidth / 2);
+            const drawPhoneItem = (x, iconStr, text) => {
+                doc.circle(x + 10, yPhone, 11).fill(cDarkGreen);
+                doc.save();
+                doc.translate(x + 2, yPhone - 8);
+                doc.scale(16/24);
+                doc.path(iconStr).fill('white');
+                doc.restore();
+                doc.fillColor(cTextBlack).text(text, x + 28, yPhone - 6);
+            };
             
-            // Push icon down by 3px to visually align with the NotoSans text baseline
-            drawIcon(icons.phone, phoneStartX, 128, 12, cTextBlack);
-            doc.text(phoneStr, phoneStartX + 20, 125);
+            const phoneStartX = 180;
+            drawPhoneItem(phoneStartX, icons.phone, '98251 55382');
+            doc.fillColor('#CCCCCC').text('|', phoneStartX + 115, yPhone - 6);
+            drawPhoneItem(phoneStartX + 130, icons.phone, '99792 27675');
+            doc.fillColor('#CCCCCC').text('|', phoneStartX + 245, yPhone - 6);
+            drawPhoneItem(phoneStartX + 260, icons.phone, '99249 00147');
 
             // --- DONATION RECEIPT BANNER ---
-            const bannerY = 170;
+            const by = 155;
+            const bh = 40;
             doc.save();
             doc.fillColor(cDarkGreen);
-            // Custom banner shape
-            doc.path('M 60 190 L 80 170 L 515 170 L 535 190 L 515 210 L 80 210 Z').fill();
-            doc.fillColor('white').font('Serif').fontSize(22).text('DONATION RECEIPT', 0, 180, { align: 'center' });
+            // Octagon banner shape
+            doc.path(`M 75 ${by} L 520 ${by} L 535 ${by+15} L 535 ${by+bh-15} L 520 ${by+bh} L 75 ${by+bh} L 60 ${by+bh-15} L 60 ${by+15} Z`).fill();
+            
+            // Inner gold border (perfectly parallel 3px inset)
+            doc.lineWidth(1).strokeColor(cBrown);
+            doc.path(`M 75 ${by+3} L 520 ${by+3} L 532 ${by+15} L 532 ${by+bh-15} L 520 ${by+bh-3} L 75 ${by+bh-3} L 63 ${by+bh-15} L 63 ${by+15} Z`).stroke();
+            
+            // Text and Diamonds
+            doc.font('Serif').fontSize(22);
+            const bannerText = 'DONATION RECEIPT';
+            const textW = doc.widthOfString(bannerText);
+            const centerX = doc.page.width / 2;
+            
+            // Draw text vertically centered (Y roughly at by + 11)
+            doc.fillColor('white').text(bannerText, centerX - textW / 2, by + 11);
+            
+            // Decorative diamonds placed exactly 25 units away from the text edges
+            doc.fillColor(cBrown);
+            const leftDiamondX = centerX - textW / 2 - 25;
+            const rightDiamondX = centerX + textW / 2 + 25;
+            
+            doc.path(`M ${leftDiamondX-7} ${by+20} L ${leftDiamondX} ${by+13} L ${leftDiamondX+7} ${by+20} L ${leftDiamondX} ${by+27} Z`).fill();
+            doc.path(`M ${rightDiamondX-7} ${by+20} L ${rightDiamondX} ${by+13} L ${rightDiamondX+7} ${by+20} L ${rightDiamondX} ${by+27} Z`).fill();
             doc.restore();
 
             // --- RECEIPT NO & DATE BOXES ---

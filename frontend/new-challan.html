@@ -62,8 +62,8 @@
                     </div>
                     
                     <div class="form-group" style="margin-bottom: 1.5rem;">
-                        <label for="address">Address <span class="required">*</span></label>
-                        <textarea id="address" name="address" rows="3" required placeholder="Enter complete address"></textarea>
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" rows="3" placeholder="Enter complete address"></textarea>
                     </div>
 
                     <div class="form-row">
@@ -84,18 +84,17 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="donationFor">Donation For (Purpose)</label>
-                            <select id="donationFor" name="donationFor">
+                            <label for="donationFor">Donation For (Purpose) <span class="required">*</span></label>
+                            <select id="donationFor" name="donationFor" required>
+                                <option value="" disabled selected>Select Purpose</option>
                                 <option value="Gau Grass">Gau Grass</option>
-                                <option value="Shed Construction">Shed Construction</option>
-                                <option value="Medical Treatment">Medical Treatment</option>
-                                <option value="General Fund" selected>General Fund</option>
+                                <option value="Ganga Swarupa Baheno Kit Sahay">Ganga Swarupa Baheno Kit Sahay</option>
                                 <option value="Other">Other</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="collectedBy">Collected By</label>
-                            <input type="text" id="collectedBy" name="collectedBy" placeholder="Enter collector name">
+                            <label for="collectedBy">Collected By <span class="required">*</span></label>
+                            <input type="text" id="collectedBy" name="collectedBy" required placeholder="Enter collector name">
                         </div>
                         <div class="form-group">
                             <label for="remarks">Remarks</label>

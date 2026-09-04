@@ -5,11 +5,11 @@ const donationSchema = new mongoose.Schema({
   receiptDate: { type: Date, default: Date.now },
   donorName: { type: String, required: true },
   mobile: { type: String, required: true, match: /^[0-9]{10}$/ },
-  address: { type: String, required: true },
+  address: { type: String, default: '' },
   amount: { type: Number, required: true, min: 1 },
   paymentMode: { type: String, required: true, enum: ['Cash', 'UPI', 'Cheque', 'Bank Transfer'] },
-  donationFor: { type: String, default: 'General Fund' },
-  collectedBy: { type: String, default: '' },
+  donationFor: { type: String, required: true },
+  collectedBy: { type: String, required: true },
   remarks: { type: String },
   createdBy: { type: String, default: 'System' }
 }, { timestamps: true });
